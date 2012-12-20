@@ -1,0 +1,11 @@
+{
+  "name": "typeahead",
+  "version": "0.0.0",
+  "description": "typeahead component",
+  "main": "typeahead.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/shtylman/typeahead.git"
+  },
+  "author": "Roman Shtylman <shtylman@gmail.com>"
+}
