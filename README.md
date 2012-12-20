@@ -38,4 +38,4 @@ Each menu item is an ```a``` inside of a ```li```. When an item is selected, the
 
 ## License
 
-[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+The current code is a copy of the bootstrap typeahead component and is licensed under [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
