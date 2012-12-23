@@ -10,8 +10,6 @@ var Typeahead = require('typeahead');
 var ta = new Typeahead(document.getElementById('input-elem') [, opt]);
 ```
 
-Note: you will need to have the [jquery](https://github.com/shtylman/node-jquery) module installed with your app dependencies to use this. In the future this will change to be self containing.
-
 ## options
 
 ### source
