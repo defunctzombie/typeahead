@@ -1,6 +1,7 @@
 "use strict"; // jshint ;_;
 
-var $ = require('jquery');
+var xtend = require('xtend');
+var dom = require('dom');
 
 var defaults = {
   source: []
@@ -11,13 +12,15 @@ var defaults = {
 }
 
 var Typeahead = function (element, options) {
-  this.$element = $(element)
-  this.options = $.extend({}, defaults, options)
+  this.element = dom(element);
+  this.options = xtend({}, defaults, options);
   this.matcher = this.options.matcher || this.matcher
   this.sorter = this.options.sorter || this.sorter
   this.highlighter = this.options.highlighter || this.highlighter
   this.updater = this.options.updater || this.updater
-  this.$menu = $(this.options.menu).appendTo('body')
+  this.menu = dom(this.options.menu);
+  dom(document.body).append(this.menu);
+
   this.source = this.options.source
   this.shown = false
   this.listen()
@@ -28,10 +31,12 @@ Typeahead.prototype = {
   constructor: Typeahead
 
 , select: function () {
-    var val = this.$menu.find('.active').attr('data-value')
-    this.$element
-      .val(this.updater(val))
-      .change()
+    var val = this.menu.find('.active').attr('data-value');
+
+    this.element
+      .value(this.updater(val))
+      .emit('change');
+
     return this.hide()
   }
 
@@ -40,8 +45,9 @@ Typeahead.prototype = {
   }
 
 , show: function () {
-    var pos = $.extend({}, this.$element.offset(), {
-      height: this.$element[0].offsetHeight
+    var offset = this.element.offset();
+    var pos = xtend({}, offset, {
+      height: this.element.offsetHeight
     })
 
     var top = pos.top + pos.height
@@ -49,22 +55,22 @@ Typeahead.prototype = {
 
     if (this.options.position === 'above') {
       top = 'auto'
-      bottom = $(document).height() - pos.top + 3;
+      bottom = document.body.clientHeight - pos.top + 3;
     }
 
-    this.$menu.css({
-      top: top
-    , bottom: bottom
-    , left: pos.left
-    })
+    this.menu.css({
+      top: top,
+      bottom: bottom,
+      left: pos.left
+    });
 
-    this.$menu.show()
+    this.menu.show();
     this.shown = true
     return this
   }
 
 , hide: function () {
-    this.$menu.hide()
+    this.menu.hide();
     this.shown = false
     return this
   }
@@ -72,24 +78,22 @@ Typeahead.prototype = {
 , lookup: function (event) {
     var items
 
-    this.query = this.$element.val()
+    this.query = this.element.value();
 
     if (!this.query || this.query.length < this.options.minLength) {
       return this.shown ? this.hide() : this
     }
 
-    items = $.isFunction(this.source) ? this.source(this.query, $.proxy(this.process, this)) : this.source
+    var is_func = (this.source instanceof Function)
+    items = is_func ? this.source(this.query, this.process.bind(this)) : this.source
 
     return items ? this.process(items) : this
   }
 
 , process: function (items) {
-    var that = this
+    var self = this
 
-    items = $.grep(items, function (item) {
-      return that.matcher(item)
-    })
-
+    items = items.filter(self.matcher.bind(self));
     items = this.sorter(items)
 
     if (!items.length) {
@@ -126,54 +130,54 @@ Typeahead.prototype = {
   }
 
 , render: function (items) {
-    var that = this
+    var self = this
 
-    items = $(items).map(function (i, item) {
-      i = $(that.options.item).attr('data-value', item)
-      i.find('a').html(that.highlighter(item))
-      return i[0]
+    items = items.map(function (item) {
+      var li = dom(self.options.item);
+      li.attr('data-value', item);
+      li.find('a').html(self.highlighter(item));
+      return li
     })
 
-    items.first().addClass('active')
-    this.$menu.html(items)
+    items[0].addClass('active');
+    this.menu.html(items);
     return this
   }
 
 , next: function (event) {
-    var active = this.$menu.find('.active').removeClass('active')
-      , next = active.next()
+    var active = this.menu.find('.active').removeClass('active');
+    var next = active.next();
 
     if (!next.length) {
-      next = $(this.$menu.find('li')[0])
+      next = this.menu.find('li').first();
     }
 
     next.addClass('active')
   }
 
 , prev: function (event) {
-    var active = this.$menu.find('.active').removeClass('active')
-      , prev = active.prev()
+    var active = this.menu.find('.active').removeClass('active');
+    var prev = active.prev();
 
     if (!prev.length) {
-      prev = this.$menu.find('li').last()
+      prev = this.menu.find('li').last();
     }
 
     prev.addClass('active')
   }
 
 , listen: function () {
-    this.$element
-      .on('blur',     $.proxy(this.blur, this))
-      .on('keypress', $.proxy(this.keypress, this))
-      .on('keyup',    $.proxy(this.keyup, this))
+    var self = this;
 
-    if ($.browser.chrome || $.browser.webkit || $.browser.msie) {
-      this.$element.on('keydown', $.proxy(this.keydown, this))
-    }
+    self.element
+      .on('blur', self.blur.bind(self))
+      .on('keypress', self.keypress.bind(self))
+      .on('keyup', self.keyup.bind(self))
+      .on('keydown', self.keydown.bind(self))
 
-    this.$menu
-      .on('click', $.proxy(this.click, this))
-      .on('mouseenter', 'li', $.proxy(this.mouseenter, this))
+    self.menu
+      .on('click', self.click.bind(self))
+      .on('mouseenter', 'li', self.mouseenter.bind(self))
   }
 
 , move: function (e) {
@@ -201,7 +205,7 @@ Typeahead.prototype = {
   }
 
 , keydown: function (e) {
-    this.suppressKeyPressRepeat = !~$.inArray(e.keyCode, [40,38,9,13,27])
+    this.suppressKeyPressRepeat = [40,38,9,13,27].indexOf(e.keyCode) >= 0
     this.move(e)
   }
 
@@ -236,8 +240,8 @@ Typeahead.prototype = {
 }
 
 , blur: function (e) {
-    var that = this
-    setTimeout(function () { that.hide() }, 150)
+    var self = this
+    setTimeout(function () { self.hide() }, 150)
   }
 
 , click: function (e) {
@@ -247,8 +251,8 @@ Typeahead.prototype = {
   }
 
 , mouseenter: function (e) {
-    this.$menu.find('.active').removeClass('active')
-    $(e.currentTarget).addClass('active')
+    this.menu.find('.active').removeClass('active');
+    dom(e.currentTarget).addClass('active');
   }
 }
 
