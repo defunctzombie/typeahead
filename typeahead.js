@@ -1,17 +1,20 @@
-"use strict"; // jshint ;_;
-
+// vendor
 var xtend = require('xtend');
 var dom = require('dom');
 
 var defaults = {
-  source: []
-, items: 8
-, menu: '<ul class="typeahead dropdown-menu"></ul>'
-, item: '<li><a href="#"></a></li>'
-, minLength: 1
+  source: [],
+  items: 8,
+  menu: '<ul class="typeahead dropdown-menu hidden"></ul>',
+  item: '<li><a href="#"></a></li>',
+  minLength: 1
 }
 
 var Typeahead = function (element, options) {
+  if (!(this instanceof Typeahead)) {
+    return new Typeahead(element, options);
+  }
+
   this.element = dom(element);
   this.options = xtend({}, defaults, options);
   this.matcher = this.options.matcher || this.matcher
@@ -47,7 +50,7 @@ Typeahead.prototype = {
 , show: function () {
     var offset = this.element.offset();
     var pos = xtend({}, offset, {
-      height: this.element.offsetHeight
+      height: this.element.outerHeight()
     })
 
     var top = pos.top + pos.height
@@ -64,13 +67,13 @@ Typeahead.prototype = {
       left: pos.left
     });
 
-    this.menu.show();
+    this.menu.removeClass('hidden');
     this.shown = true
     return this
   }
 
 , hide: function () {
-    this.menu.hide();
+    this.menu.addClass('hidden');
     this.shown = false
     return this
   }
@@ -84,10 +87,14 @@ Typeahead.prototype = {
       return this.shown ? this.hide() : this
     }
 
-    var is_func = (this.source instanceof Function)
-    items = is_func ? this.source(this.query, this.process.bind(this)) : this.source
+    if (this.source instanceof Function) {
+      this.source(this.query, this.process.bind(this));
+    }
+    else {
+      this.process(this.source);
+    }
 
-    return items ? this.process(items) : this
+    return this;
   }
 
 , process: function (items) {
@@ -140,7 +147,11 @@ Typeahead.prototype = {
     })
 
     items[0].addClass('active');
-    this.menu.html(items);
+
+    self.menu.empty();
+    items.forEach(function(item) {
+      self.menu.append(item);
+    });
     return this
   }
 
