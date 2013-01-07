@@ -8,7 +8,8 @@
     "url": "git://github.com/shtylman/typeahead.git"
   },
   "dependencies": {
-    "dom": "shtylman/dom#bcf43c"
+    "dom": "0.0.2",
+    "xtend": "1.0.3"
   },
   "author": "Roman Shtylman <shtylman@gmail.com>"
 }
