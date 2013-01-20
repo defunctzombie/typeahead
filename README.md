@@ -1,6 +1,6 @@
 # typeahead
 
-Bootstrap compatible typeahead component.
+typeahead widget
 
 ## use
 
@@ -27,13 +27,23 @@ function(query, result) {
 
 ## style
 
-The Typeahead menu list has the following classes applied.
+Custom styling can be applied for the following rules.
 
-* typeahead
-* dropdown-menu
+### ul.typeahead
+To style the list of suggestions.
 
-Each menu item is an ```a``` inside of a ```li```. When an item is selected, the ```active``` class is set on the ```li``` element.
+### .typeahead.hidden
+To style the hidden state of the menu
+
+### .typeahead li
+To style a li container.
+
+### .typeahead a
+To style the actual item text and selection area.
+
+### .typeahead .active > a
+To style the appearance of a selected item.
 
 ## License
 
-The current code is a copy of the bootstrap typeahead component and is licensed under [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
+The current code is fork of the bootstrap typeahead component and is licensed under [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
