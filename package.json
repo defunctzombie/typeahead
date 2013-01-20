@@ -1,6 +1,6 @@
 {
   "name": "typeahead",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "typeahead component",
   "main": "typeahead.js",
   "repository": {
