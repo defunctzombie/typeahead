@@ -2,6 +2,8 @@
 
 typeahead widget
 
+![typeahead](http://shtylman.github.com/typeahead/img.png)
+
 ## use
 
 ```javascript
