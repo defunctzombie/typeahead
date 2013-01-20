@@ -11,5 +11,6 @@
     "dom": "0.0.2",
     "xtend": "1.0.3"
   },
+  "style": "./style.css",
   "author": "Roman Shtylman <shtylman@gmail.com>"
 }
