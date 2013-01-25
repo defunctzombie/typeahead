@@ -59,9 +59,16 @@ proto.show = function () {
     var offset = self.element.offset();
     var pos = xtend({}, offset, {
         height: self.element.outerHeight()
-    })
+    });
 
-    var top = pos.top + pos.height + 'px';
+    var scroll = 0;
+    var parent = self.element[0];
+    while (parent = parent.parentElement) {
+        scroll += parent.scrollTop;
+    }
+
+    // if page has scrolled we need real position in viewport
+    var top = pos.top + pos.height - scroll + 'px';
     var bottom = 'auto';
 
     if (self.options.position === 'above') {
