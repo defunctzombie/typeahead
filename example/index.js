@@ -7,8 +7,7 @@ var ta = Typeahead(input, {
     source: ['foo', 'bar', 'baz']
 });
 
-input
-// =>
+input // =>
 
 var input = document.createElement('input');
 
@@ -21,8 +20,7 @@ var ta = Typeahead(input, {
     }
 });
 
-input
-// =>
+input // =>
 
 // If you want to know when the input changes, bind to the `change` event of the input element
 
@@ -32,5 +30,4 @@ input.addEventListener('change', function() {
     div.innerHTML = 'input value: ' + input.value;
 });
 
-div
-// =>
+div // =>
