@@ -9,7 +9,14 @@ typeahead widget
 ```javascript
 var Typeahead = require('typeahead');
 
-var ta = new Typeahead(document.getElementById('input-elem') [, opt]);
+var input = document.createElement('input');
+
+// source is an array of items
+var ta = Typeahead(input, {
+    source: ['foo', 'bar', 'baz']
+});
+
+input // =>
 ```
 
 ## options
@@ -18,10 +25,17 @@ var ta = new Typeahead(document.getElementById('input-elem') [, opt]);
 > array of values or function(query, result). Call result with array of return values.
 
 ```javascript
-function(query, result) {
-    // AJAX query here...
-    result(['foo', 'bar']);
-}
+var Typeahead = require('typeahead');
+var input = document.createElement('input');
+
+// source is an array of items
+var ta = Typeahead(input, {
+    source: function(query, result) {
+        result(['foo', 'bar', 'baz']);
+    }
+});
+
+input // =>
 ```
 
 ### position
