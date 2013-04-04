@@ -19,6 +19,8 @@ var ta = Typeahead(input, {
 input // =>
 ```
 
+To get the default style you also have to include `style.css`.
+
 ## options
 
 ### source
@@ -45,7 +47,7 @@ input // =>
 
 Custom styling can be applied for the following rules.
 
-### ul.typeahead
+### .typeahead
 To style the list of suggestions.
 
 ### .typeahead.hidden

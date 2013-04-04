@@ -1,8 +1,5 @@
 .typeahead {
     margin-top: 2px;
-}
-
-ul.typeahead {
     position: absolute;
     top: 0;
     left: 0;
@@ -16,11 +13,11 @@ ul.typeahead {
     border: 1px solid #CCC;
 }
 
-li {
+.typeahead li {
     line-height: 20px;
 }
 
-a {
+.typeahead a {
     display: block;
     padding: 3px 20px;
     clear: both;
@@ -31,7 +28,7 @@ a {
     text-decoration: none;
 }
 
-.active > a {
+.typeahead .active > a {
     color: white;
     text-decoration: none;
     background-color: #0081C2;
