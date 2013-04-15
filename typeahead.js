@@ -59,27 +59,31 @@ proto.show = function () {
     var offset = self.element.offset();
     var pos = xtend({}, offset, {
         height: self.element.outerHeight()
-    });
+    })
 
-    var scroll = 0;
-    var parent = self.element[0];
+    var scroll = 0
+    var parent = self.element[0]
     while (parent = parent.parentElement) {
-        scroll += parent.scrollTop;
+        scroll += parent.scrollTop
     }
 
     // if page has scrolled we need real position in viewport
-    var top = pos.top + pos.height - scroll + 'px';
-    var bottom = 'auto';
+    var top = pos.top + pos.height - scroll + 'px'
+    var bottom = 'auto'
+    var left = pos.left + 'px'
 
     if (self.options.position === 'above') {
         top = 'auto'
-        bottom = document.body.clientHeight - pos.top + 3;
+        bottom = document.body.clientHeight - pos.top + 3
+    } else if (self.options.position === 'right') {
+        top = parseInt(top.split('px')[0], 10) - self.element.outerHeight() + 'px'
+        left = parseInt(left.split('px')[0], 10) + self.element.outerWidth() + 'px'
     }
 
     self.menu.css({
         top: top,
         bottom: bottom,
-        left: pos.left + 'px'
+        left: left
     });
 
     self.menu.removeClass('hidden');
