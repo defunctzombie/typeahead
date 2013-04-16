@@ -41,7 +41,7 @@ input // =>
 ```
 
 ### position
-> location of the drop down menu. Valid values are ```above```, ```below``` and ```left```. default is ```below```
+> location of the drop down menu. Valid values are ```above```, ```below``` and ```right```. default is ```below```
 
 ## style
 
