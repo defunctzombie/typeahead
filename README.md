@@ -2,7 +2,7 @@
 
 typeahead widget
 
-![typeahead](http://shtylman.github.com/typeahead/img.png)
+![typeahead](http://defunctzombie.github.com/typeahead/img.png)
 
 ## use
 
