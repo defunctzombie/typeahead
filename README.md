@@ -43,6 +43,9 @@ input // =>
 ### position
 > location of the drop down menu. Valid values are ```above```, ```below``` and ```right```. default is ```below```
 
+### autoselect
+> Automatically select first item in drop down menu. Valid values are ```true```, ```false```. Default is ```true```.
+
 ## style
 
 Custom styling can be applied for the following rules.

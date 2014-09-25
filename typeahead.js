@@ -7,7 +7,8 @@ var defaults = {
     items: 8,
     menu: '<ul class="typeahead hidden"></ul>',
     item: '<li><a href="#"></a></li>',
-    minLength: 1
+    minLength: 1,
+    autoselect: true
 }
 
 var Typeahead = function (element, options) {
@@ -166,7 +167,7 @@ proto.render = function (items) {
         return li;
     })
 
-    items[0].addClass('active');
+    self.options.autoselect && items[0].addClass('active');
 
     self.menu.empty();
     items.forEach(function(item) {
