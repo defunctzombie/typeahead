@@ -65,6 +65,11 @@ proto.show = function () {
     var scroll = 0
     var parent = self.element[0]
     while (parent = parent.parentElement) {
+        // prevent adding window scroll
+        if (parent.tagName.toLowerCase() === 'html') {
+            continue;
+        }
+        
         scroll += parent.scrollTop
     }
 
