@@ -102,6 +102,7 @@ proto.show = function () {
 proto.hide = function () {
     this.menu.addClass('hidden');
     this.shown = false;
+    this.mousedown = false;
     return this;
 }
 
@@ -215,6 +216,8 @@ proto.listen = function () {
       .on('keydown', self.keydown.bind(self))
 
     self.menu
+      .on('mousedown', self.mousedown.bind(self))
+      .on('mouseup', self.mouseup.bind(self))
       .on('click', self.click.bind(self))
       .on('mouseenter', 'li', self.mouseenter.bind(self))
 }
@@ -280,9 +283,19 @@ proto.keyup = function (e) {
     e.preventDefault()
 }
 
+proto.mousedown = function (e) {
+    this.mousedown = true;
+}
+proto.mouseup = function (e) {
+    this.mousedown = false;
+}
 proto.blur = function (e) {
     var self = this;
-    setTimeout(function () { self.hide() }, 150);
+    setTimeout(function () {
+        if (!self.mousedown) {
+            self.hide();
+        }
+    }, 150);
 }
 
 proto.click = function (e) {
