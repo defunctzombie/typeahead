@@ -1,35 +1,50 @@
-// vendor
-var xtend = require('xtend');
-var dom = require('dom');
-
 var defaults = {
     source: [],
     items: 8,
-    menu: '<ul class="typeahead hidden"></ul>',
-    item: '<li><a href="#"></a></li>',
+    menu: 'ul',
+    item: 'li',
     minLength: 1,
     autoselect: true
 }
 
-var Typeahead = function (element, options) {
-    if (!(this instanceof Typeahead)) {
-        return new Typeahead(element, options);
+var offset = function(el) {
+    var curleft = 0,
+        curtop = 0;
+
+    if (el.offsetParent)
+        do {
+            curleft += el.offsetLeft;
+            curtop += el.offsetTop;
+        } while (el = el.offsetParent)
+
+    return {
+        left: curleft,
+        top: curtop
+    }
+};
+
+export default function Typeahead(element, options) {
+    this.element = element;
+    this.options = {};
+
+    // update keys in defaults function
+    for (var key in defaults) {
+        if (defaults.hasOwnProperty(key))
+            this.options[key] = options[key] || defaults[key];
     }
 
-    var self = this;
+    // update functions
+    this.matcher = options.matcher || this.matcher;
+    this.sorter = options.sorter || this.sorter;
+    this.highlighter = options.highlighter || this.highlighter;
+    this.updater = options.updater || this.updater;
 
-    self.element = dom(element);
-    self.options = xtend({}, defaults, options);
-    self.matcher = self.options.matcher || self.matcher
-    self.sorter = self.options.sorter || self.sorter
-    self.highlighter = self.options.highlighter || self.highlighter
-    self.updater = self.options.updater || self.updater
-    self.menu = dom(self.options.menu);
-    dom(document.body).append(self.menu);
+    this.menu = document.createElement(this.options.menu);
+    this.menu.classList.add('typeahead');
+    this.menu.classList.add('hidden');
+    document.body.appendChild(this.menu);
 
-    self.source = self.options.source;
-    self.shown = false;
-    self.listen();
+    return this.listen();
 }
 
 // for minification
@@ -37,128 +52,138 @@ var proto = Typeahead.prototype;
 
 proto.constructor = Typeahead;
 
+proto.active = function () {
+    return this.menu.getElementsByClassName('active').item(0);
+}
+
 // select the current item
 proto.select = function() {
-    var self = this;
-    var val = self.menu.find('.active').attr('data-value');
+    var ev = new Event('change');
+    var active = this.active()
 
-    self.element
-      .value(self.updater(val))
-      .emit('change');
+    // add attributes to input element
+    Object.keys(active.dataset).forEach(function(e) {
+        this.element.dataset[e] = active.dataset[e];
+    }, this);
 
-    return self.hide();
+    this.element.value = this.updater(active);
+    this.element.dispatchEvent(ev);
+    this.hide();
 }
 
 proto.updater = function (item) {
-    return item;
+    return item.dataset.value;
 }
 
 // show the popup menu
 proto.show = function () {
-    var self = this;
+    var self = this,
+        scroll = 0,
+        pos = offset(self.element),
+        parent = self.element;
 
-    var offset = self.element.offset();
-    var pos = xtend({}, offset, {
-        height: self.element.outerHeight()
-    })
+    pos.height = self.element.offsetHeight;
 
-    var scroll = 0
-    var parent = self.element[0]
     while (parent = parent.parentElement) {
         // prevent adding window scroll
-        var tag = parent.tagName.toLowerCase();
+        var tag = self.element.tagName.toLowerCase();
         if (tag === 'html' || tag === 'body') {
             continue;
         }
-        
         scroll += parent.scrollTop
     }
 
     // if page has scrolled we need real position in viewport
-    var top = pos.top + pos.height - scroll + 'px'
+    var top = pos.top + pos.height - scroll;
     var bottom = 'auto'
-    var left = pos.left + 'px'
+    var left = pos.left;
 
     if (self.options.position === 'above') {
         top = 'auto'
-        bottom = document.body.clientHeight - pos.top + 3
+        bottom = (document.body.clientHeight - pos.top + 3) + 'px';
     } else if (self.options.position === 'right') {
-        top = parseInt(top.split('px')[0], 10) - self.element.outerHeight() + 'px'
-        left = parseInt(left.split('px')[0], 10) + self.element.outerWidth() + 'px'
+        top = (top - self.element.offsetHeight) + 'px';
+        left = (pos.left + self.element.offsetWidth);
+    } else {
+        top = top + 'px';
     }
 
-    self.menu.css({
-        top: top,
-        bottom: bottom,
-        left: left
-    });
-
-    self.menu.removeClass('hidden');
-    self.shown = true;
+    self.menu.style.top = top;
+    self.menu.style.bottom = bottom;
+    self.menu.style.left = left + 'px';
+    self.menu.classList.remove('hidden');
     return self;
 }
 
 // hide the popup menu
 proto.hide = function () {
-    this.menu.addClass('hidden');
-    this.shown = false;
+    this.menu.classList.add('hidden');
     return this;
 }
 
-proto.lookup = function (event) {
-    var self = this;
+/**
+ * Returns true if the menu is currently show
+ */
+proto.shown = function () {
+    return !this.menu.classList.contains('hidden');
+}
 
-    self.query = self.element.value();
+proto.lookup = function () {
+    var self = this;
+    self.query = self.element.value;
 
     if (!self.query || self.query.length < self.options.minLength) {
-        return self.shown ? self.hide() : self
+        return self.shown() ? self.hide() : self;
     }
 
-    if (self.source instanceof Function) {
-        self.source(self.query, self.process.bind(self));
+    if (self.options.source instanceof Function) {
+        self.options.source(self.query, self.process.bind(self));
     }
+
     else {
-        self.process(self.source);
+        self.process(self.options.source);
     }
-
     return self;
 }
 
 proto.process = function (items) {
     var self = this;
 
-    items = items.filter(self.matcher.bind(self));
+    items = items.filter(self.matcher, self);
     items = self.sorter(items)
 
     if (!items.length) {
-      return self.shown ? self.hide() : self
+      return self.shown() ? self.hide() : self
     }
 
-    return self.render(items.slice(0, self.options.items)).show()
+    self.render(items.slice(0, self.options.items))
+        .show()
 }
 
 proto.matcher = function (item) {
-  return ~item.toLowerCase().indexOf(this.query.toLowerCase())
+    var v = (typeof(item) === 'string') ? item : item.value;
+    return ~v.toLowerCase().indexOf(this.query.toLowerCase())
 }
 
 proto.sorter = function (items) {
     var beginswith = [];
     var caseSensitive = [];
     var caseInsensitive = [];
-    var item;
 
-    while (item = items.shift()) {
-      if (!item.toLowerCase().indexOf(this.query.toLowerCase())) beginswith.push(item)
-      else if (~item.indexOf(this.query)) caseSensitive.push(item)
-      else caseInsensitive.push(item)
-    }
+    items.forEach(function(item) {
+        var v = (typeof(item) === 'string') ? item : item.value;
+
+        if (!v.toLowerCase().indexOf(this.query.toLowerCase())) beginswith.push(item)
+        else if (~v.indexOf(this.query)) caseSensitive.push(item)
+        else caseInsensitive.push(item)
+    }, this);
 
     return beginswith.concat(caseSensitive, caseInsensitive)
 }
 
-proto.highlighter = function (item) {
+proto.highlighter = function (value) {
     var query = this.query.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, '\\$&');
-    return item.replace(new RegExp('(' + query + ')', 'ig'), function ($1, match) {
+    return value.replace(new RegExp('(' + query + ')', 'ig'), function ($1, match) {
         return '<strong>' + match + '</strong>'
     })
 }
@@ -167,60 +192,79 @@ proto.render = function (items) {
     var self = this;
 
     items = items.map(function (item) {
-        var li = dom(self.options.item);
-        li.attr('data-value', item)
-          .find('a').html(self.highlighter(item));
+
+        var li = document.createElement(self.options.item),
+            a = document.createElement('a');
+
+        if (typeof(item) === 'string') {
+            li.dataset.value = item;
+            a.innerHTML = self.highlighter(item);
+        } else {
+            // we expect to have an object, and will fill up the dataset.
+            Object.keys(item).forEach(function(x) {
+                li.dataset[x] = item[x];
+            });
+            a.innerHTML = self.highlighter(item.value);
+        }
+        
+        li.appendChild(a);
         return li;
-    })
-
-    self.options.autoselect && items[0].addClass('active');
-
-    self.menu.empty();
-    items.forEach(function(item) {
-        self.menu.append(item);
     });
 
-    return this;
+    if (self.options.autoselect)
+        items[0].classList.add('active');
+
+    self.menu.innerHTML = '';
+    items.forEach(function(item) {
+        self.menu.appendChild(item);
+    });
+
+    return self;
 }
 
-proto.next = function (event) {
-    var active = this.menu.find('.active').removeClass('active');
-    var next = active.next();
+proto.next = function () {
+    var active = this.active();
+    var next = active.nextElementSibling;
+    active.classList.remove('active');
 
-    if (!next.length) {
-        next = this.menu.find('li').first();
+    if (!next) {
+        next = this.menu.getElementsByTagName(this.options.item).item(0);
     }
 
-    next.addClass('active');
+    next.classList.add('active');
 }
 
-proto.prev = function (event) {
-    var active = this.menu.find('.active').removeClass('active');
-    var prev = active.prev();
+proto.prev = function () {
+    var active = this.active();
+    var prev = active.previousElementSibling;
+    active.classList.remove('active');
 
-    if (!prev.length) {
-        prev = this.menu.find('li').last();
+    if (!prev) {
+        var items = this.menu.getElementsByTagName(this.options.item);
+        prev = items.item(items.length-1);
     }
 
-    prev.addClass('active');
+    prev.classList.add('active');
 }
 
 proto.listen = function () {
-    var self = this;
+    var self = this,
+        element = self.element;
 
-    self.element
-      .on('blur', self.blur.bind(self))
-      .on('keypress', self.keypress.bind(self))
-      .on('keyup', self.keyup.bind(self))
-      .on('keydown', self.keydown.bind(self))
+    element.addEventListener('blur', self.blur.bind(self));
+    element.addEventListener('keypress', self.keypress.bind(self));
+    element.addEventListener('keyup', self.keyup.bind(self));
+    element.addEventListener('keydown', self.keydown.bind(self));
 
-    self.menu
-      .on('click', self.click.bind(self))
-      .on('mouseenter', 'li', self.mouseenter.bind(self))
+    self.menu.addEventListener('click', self.click.bind(self));
+    self.menu.addEventListener('mouseenter', self.mouseenter.bind(self));
+
+    return self;
 }
 
 proto.move = function (e) {
-    if (!this.shown) return
+    var self = this;
+    if (!this.shown()) return
 
     switch(e.keyCode) {
     case 9: // tab
@@ -231,12 +275,12 @@ proto.move = function (e) {
 
     case 38: // up arrow
         e.preventDefault()
-        this.prev()
+        self.prev()
         break
 
     case 40: // down arrow
         e.preventDefault()
-        this.next()
+        self.next()
         break
     }
 
@@ -263,12 +307,12 @@ proto.keyup = function (e) {
 
     case 9: // tab
     case 13: // enter
-        if (!self.shown) return
+        if (!this.shown()) return
         self.select()
         break
 
     case 27: // escape
-        if (!self.shown) return
+        if (!self.shown()) return
         self.hide()
         break
 
@@ -280,7 +324,7 @@ proto.keyup = function (e) {
     e.preventDefault()
 }
 
-proto.blur = function (e) {
+proto.blur = function () {
     var self = this;
     setTimeout(function () { self.hide() }, 150);
 }
@@ -292,8 +336,6 @@ proto.click = function (e) {
 }
 
 proto.mouseenter = function (e) {
-    this.menu.find('.active').removeClass('active');
-    dom(e.currentTarget).addClass('active');
+    this.active().classList.remove('active');
+    e.currentTarget.classList.add('active');
 }
-
-module.exports = Typeahead;

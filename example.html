@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>typeahead example</title>
+<link rel="stylesheet" href="style.css">
+<script src="typeahead.js"></script>
+<style>
+    form {
+        text-align: center;
+        font-size: 72px;
+        margin-bottom: 36px;
+    }
+    input {
+        width: 300px;
+        height: 24px;
+    }
+</style>
+</head>
+<body>
+
+<form><input type="text" id="example-1"></form>
+
+<form><input type="text" id="example-2"></form>
+
+<div id="listen-1"></div>
+
+<div id="listen-2"></div>
+
+<script>
+var input1 = document.getElementById('example-1');
+
+// source is an array of items
+var ta1 = new Typeahead(input1, {
+    source: ['foo', 'bar', 'baz']
+});
+
+var input2 = document.getElementById('example-2');
+// you can also specify a function
+var ta2 = new Typeahead(input2, {
+    source: function(query, cb) {
+        console.debug('query', query);
+        // simulate some ajax
+        // call 'callback' when we have a result array
+        cb(['foo', 'bar', 'baz', 'bash']);
+    }
+});
+
+// If you want to know when the input changes, bind to the `change` event of the input element
+var div1 = document.getElementById('listen-1');
+var div2 = document.getElementById('listen-2');
+
+input1.addEventListener('change', function(event) {
+    div1.innerHTML = 'input value: ' + event.target.value;
+});
+
+input2.addEventListener('change', function(event) {
+    div2.innerHTML = 'input value: ' + event.target.value;
+});
+
+</script>
+</body>
+</html>
