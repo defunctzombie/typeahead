@@ -58,7 +58,7 @@ proto.active = function () {
 
 // select the current item
 proto.select = function() {
-    var ev = new Event('change');
+    var ev = new Event('change.typeahead');
     var active = this.active()
 
     // add attributes to input element
