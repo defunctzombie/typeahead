@@ -23,6 +23,12 @@ var offset = function(el) {
     }
 };
 
+/**
+ * @constructs Typeahead
+ * @param {DOM node} element
+ * @param {object} options
+ * @returns {Typeahead}
+ */
 export default function Typeahead(element, options) {
     this.element = element;
     this.options = {};
