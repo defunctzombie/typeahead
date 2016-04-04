@@ -196,11 +196,12 @@ proto.highlighter = function (value) {
 
 proto.render = function (items) {
     var self = this;
-
+    var mouseenter = self.mouseenter.bind(self);
     items = items.map(function (item) {
-
         var li = document.createElement(self.options.item),
             a = document.createElement('a');
+
+        li.addEventListener('mouseenter', mouseenter);
 
         if (typeof(item) === 'string') {
             li.dataset.value = item;
@@ -263,7 +264,6 @@ proto.listen = function () {
     element.addEventListener('keydown', self.keydown.bind(self));
 
     self.menu.addEventListener('click', self.click.bind(self));
-    self.menu.addEventListener('mouseenter', self.mouseenter.bind(self));
 
     return self;
 }
@@ -342,6 +342,7 @@ proto.click = function (e) {
 }
 
 proto.mouseenter = function (e) {
-    this.active().classList.remove('active');
+    var active = this.active();
+    if (active) active.classList.remove('active');
     e.currentTarget.classList.add('active');
 }
