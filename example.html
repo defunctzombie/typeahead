@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>typeahead example</title>
+<link rel="stylesheet" href="style.css">
+<script src="dist/typeahead.bundle.js"></script>
+<style>
+    body {
+        margin: 36px;
+    }
+    div {
+        border: 1px solid gray;
+        width: 300px;
+        height: 100px;
+    }
+    input {
+        width: 300px;
+        height: 24px;
+    }
+</style>
+</head>
+<body>
+
+<form><input type="text" id="example-1"></form>
+
+<div id="listen-1"></div>
+
+<p>This example uses objects to access an object for each match, rather than a single string.</p>
+<form><input type="text" id="example-2"></form>
+
+<div id="listen-2"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    var input1 = document.getElementById('example-1');
+
+    // source is an array of items
+    var ta1 = new Typeahead(input1, {
+        source: ['foo', 'bar', 'baz']
+    });
+
+    var div1 = document.getElementById('listen-1');
+
+    // If you want to know when the input changes, bind to the `change.typeahead` event of the input element
+    input1.addEventListener('change.typeahead', function(event) {
+        div1.innerHTML += 'input value: ' + event.target.value + '<br>';
+    });
+
+    // this example uses a custom function to retrieve the matches,
+    // and uses objects instead of strings for each match
+
+    var options = {
+        // you can also specify a source function
+        source: function(query, callback) {
+            // simulate some ajax
+            // In this example. we return objects, not strings.
+            // These objects must have a "value" key.
+            // All of the keys will be added to the match item's dataset, see below
+            var objects = [
+                {value: 'foo', name: 'first one'},
+                {value: 'bar', name: 'second one'},
+                {value: 'baz', name: 'third one'},
+                {value: 'bash', name: 'fourth one'},
+            ];
+
+            // call 'callback' when we have a result array
+            callback(objects);
+        },
+    };
+    var input2 = document.getElementById('example-2');
+    var div2 = document.getElementById('listen-2');
+
+    var ta2 = new Typeahead(input2, options);
+
+    input2.addEventListener('change.typeahead', function(event) {
+        div2.innerHTML += 'input value: ' + event.target.value + ', data: ' + event.target.dataset.name + '<br>';
+    });
+
+});
+</script>
+</body>
+</html>

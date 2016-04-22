@@ -2,15 +2,18 @@
   "name": "typeahead",
   "version": "0.2.2",
   "description": "typeahead component",
-  "main": "typeahead.js",
+  "main": "dist/typeahead.cjs.js",
+  "esnext:main": "typeahead.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/shtylman/typeahead.git"
   },
-  "dependencies": {
-    "dom": "0.0.2",
-    "xtend": "1.0.3"
-  },
   "style": "./style.css",
-  "author": "Roman Shtylman <shtylman@gmail.com>"
+  "author": "Roman Shtylman <shtylman@gmail.com>",
+  "scripts": {
+    "cjs": "rollup -f cjs typeahead.js -o dist/typeahead.cjs.js",
+    "bundle": "rollup -f iife --name Typeahead typeahead.js -o dist/typeahead.bundle.js",
+    "bundle.min": "uglifyjs dist/typeahead.bundle.js -cmo dist/typeahead.bundle.min.js",
+    "prepublish": "npm run cjs && npm run bundle && npm run bundle.min"
+  }
 }
