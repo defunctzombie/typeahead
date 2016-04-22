@@ -1,0 +1,25 @@
+{
+  "name": "typeahead",
+  "description": "typeahead component",
+  "main": "dist/typeahead.bundle.min.js",
+  "authors": [
+    "Roman Shtylman <shtylman@gmail.com>",
+    "Neil Freeman <contact@fakeisthenewreal.org>"
+  ],
+  "license": "Apache",
+  "keywords": [
+    "typeahead",
+    "ui"
+  ],
+  "homepage": "https://github.com/defunctzombie/typeahead",
+  "moduleType": [
+    "globals"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
